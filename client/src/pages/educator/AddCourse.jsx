@@ -1,9 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import uniqid from 'uniqid';
 import Quill from 'quill';
 import { assets } from '../../assets/assets';
+import { AppContext } from '../../context/AppContext.jsx';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const AddCourse = () => {
+
+  const { backendUrl, getToken } = useContext(AppContext)
 
   const quillRef = useRef(null);
   const editorRef = useRef(null);
@@ -92,7 +97,44 @@ const AddCourse = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    try {
+      e.preventDefault()
+      if(!image){
+        toast.error('Thumbnail Not Selected')
+      }
+
+      const courseData = {
+        courseTitle,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice: Number(coursePrice),
+        discount: Number(discount),
+        courseContent: chapters,
+
+      }
+
+      const formData = new FormData()
+      formData.append('courseData', JSON.stringify(courseData))
+      formData.append('image', image)
+
+      const token = await getToken()
+      const {data} = await axios.post(backendUrl + '/api/educator/add-course', formData, { headers: { Authorization: `Bearer ${token}`}})
+
+      if (data.success){
+        toast.success(data.message)
+        setCourseTitle('')
+        setCoursePrice(0)
+        setDiscount(0)
+        setImage(null)
+        setChapters([])
+        quillRef.current.root.innerHTML = ""
+
+      }else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+    
   };
 
 
@@ -107,8 +149,8 @@ const AddCourse = () => {
   }, [])
 
   return (
-    <div className='h-screen overflow-scroll flex flex-col items-center justify-center md:p-8 md:pb-0 p-4 pt-8 pb-0'>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-9 mb-11 max-w-2xl w-full text-gray-700 bg-[#070f5509] border border-gray-200 rounded-xl shadow-lg backdrop-blur-sm p-6'>
+    <div className='h-screen overflow-scroll items-center flex flex-col md:p-8 md:pb-0 p-4 pt-8 pb-0'>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-9  max-w-2xl w-full text-gray-700 bg-[#070f5509] border border-gray-200 rounded-xl shadow-lg backdrop-blur-sm p-6'>
         <div className='flex flex-col gap-1 '>
           <p className='text-lg font-bold'>Course Title</p>
           <input onChange={e => setCourseTitle(e.target.value)} value={courseTitle} type="text" placeholder='Type here' className='outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500' required />
