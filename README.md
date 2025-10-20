@@ -1,6 +1,6 @@
 ## Full Stack Learning Management System (LMS)
 
-### A MERN-based Learning Management System with Clerk authentication and Stripe payments. Educators upload courses; students enroll, watch content, rate/review, and purchase access online.
+#### A MERN-based Learning Management System with Clerk authentication and Stripe payments. Educators upload courses; students enroll, watch content, rate/review, and purchase access online.
 
 ### Table of Contents
 - #### Purpose & Audience
